@@ -17,9 +17,9 @@ window.config = {
       configuration: {
         friendlyName: 'Dcm4chee Server',
         name: 'Dcm4chee',
-        wadoUriRoot: 'https://portainertest.cloudcompuexpediente.com/pacs',
-        qidoRoot: 'https://portainertest.cloudcompuexpediente.com/pacs',
-        wadoRoot: 'https://portainertest.cloudcompuexpediente.com/pacs',
+        wadoUriRoot: "https://pacsdicom.cloudcompuexpediente.com/dcm4chee-arc/aets/DCM4CHEE/wado",
+        qidoRoot: "https://pacsdicom.cloudcompuexpediente.com/dcm4chee-arc/aets/DCM4CHEE/rs",
+        wadoRoot: "https://pacsdicom.cloudcompuexpediente.com/dcm4chee-arc/aets/DCM4CHEE/rs",
         qidoSupportsIncludeField: false,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
