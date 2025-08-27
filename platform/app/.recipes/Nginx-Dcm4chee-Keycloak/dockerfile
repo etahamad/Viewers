@@ -18,11 +18,8 @@ RUN yarn install
 # Set the environment for the build
 ENV APP_CONFIG=config/docker-nginx-dcm4chee-keycloak.js
 
-# Allow Node to not minify heavily (less memory needed)
-ENV NODE_OPTIONS="--max_old_space_size=2048"
-
 # Run a non-minified build
-RUN yarn run build --skip-nx-cache --verbose
+RUN yarn run build
 
 # Stage 2: Setup the NGINX environment with OAuth2 Proxy
 FROM nginx:alpine
