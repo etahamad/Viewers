@@ -9,9 +9,9 @@ window.config = {
   strictZSpacingForVolumeViewport: true,
   oidc: [
     {
-      authority: "http://localhost:8081/realms/dcm4che",
+      authority: "https://authdicom.cloudcompuexpediente.com/realms/dcm4che",
       client_id: "ohif-viewer",
-      redirect_uri: "http://localhost/callback",
+      redirect_uri: "https://viewerdicom.cloudcompuexpediente.com/callback",
       response_type: "id_token token",
       scope: "openid email profile",
       post_logout_redirect_uri: "/",
@@ -27,9 +27,9 @@ window.config = {
       configuration: {
         friendlyName: "Dcm4chee Server",
         name: "Dcm4chee",
-        wadoUriRoot: "http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/wado",
-        qidoRoot: "http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs",
-        wadoRoot: "http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs",
+        wadoUriRoot: "https://pacsdicom.cloudcompuexpediente.com/dcm4chee-arc/aets/DCM4CHEE/wado",
+        qidoRoot: "https://pacsdicom.cloudcompuexpediente.com/dcm4chee-arc/aets/DCM4CHEE/rs",
+        wadoRoot: "https://pacsdicom.cloudcompuexpediente.com/dcm4chee-arc/aets/DCM4CHEE/rs",
         qidoSupportsIncludeField: false,
         imageRendering: "wadors",
         thumbnailRendering: "wadors",
