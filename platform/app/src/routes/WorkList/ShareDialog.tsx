@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Button, Modal } from '@ohif/ui-next';
+import { Button } from '@ohif/ui';
 
-function ShareDialog({ studyInstanceUid, onComplete }) {
+function ShareDialog({ studyInstanceUid, onComplete, hide }) {
   const [password, setPassword] = useState('');
   const [generatedLink, setGeneratedLink] = useState('');
 
@@ -12,38 +12,58 @@ function ShareDialog({ studyInstanceUid, onComplete }) {
   };
 
   return (
-    <Modal
-      isOpen={true}
-      title="Share Study"
-      onClose={onComplete}
-    >
-      <div style={{ padding: '20px', color: 'white' }}>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="password">Password (optional)</label>
+    <div className="bg-secondary-dark rounded-md p-4">
+      <div className="flex flex-row justify-between">
+        <h5 className="text-2xl text-white">Share Study</h5>
+        <Button
+          onClick={hide}
+          className="text-2xl text-white"
+        >
+          &times;
+        </Button>
+      </div>
+      <div className="mt-4">
+        <div className="mb-4">
+          <label
+            htmlFor="password"
+            className="mb-2 block text-sm font-bold text-white"
+          >
+            Password (optional)
+          </label>
           <input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={{ color: 'black', width: '100%' }}
+            className="focus:shadow-outline w-full appearance-none rounded border py-2 px-3 leading-tight text-gray-700 shadow focus:outline-none"
           />
         </div>
-        <Button onClick={handleGenerateLink}>Generate Link</Button>
+        <Button
+          onClick={handleGenerateLink}
+          className="bg-primary-main hover:bg-primary-dark w-full rounded py-2 px-4 font-bold text-white"
+        >
+          Generate Link
+        </Button>
         {generatedLink && (
-          <div style={{ marginTop: '20px' }}>
-            <input
-              type="text"
-              readOnly
-              value={generatedLink}
-              style={{ color: 'black', width: 'calc(100% - 80px)', marginRight: '10px' }}
-            />
-            <Button onClick={() => navigator.clipboard.writeText(generatedLink)}>
-              Copy
-            </Button>
+          <div className="mt-4">
+            <div className="flex">
+              <input
+                type="text"
+                readOnly
+                value={generatedLink}
+                className="focus:shadow-outline w-full appearance-none rounded-l border py-2 px-3 leading-tight text-gray-700 shadow focus:outline-none"
+              />
+              <Button
+                onClick={() => navigator.clipboard.writeText(generatedLink)}
+                className="bg-primary-main hover:bg-primary-dark rounded-r px-4 font-bold text-white"
+              >
+                Copy
+              </Button>
+            </div>
           </div>
         )}
       </div>
-    </Modal>
+    </div>
   );
 }
 
