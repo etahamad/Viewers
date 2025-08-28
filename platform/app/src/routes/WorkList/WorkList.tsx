@@ -35,6 +35,7 @@ import {
   ScrollArea,
   InvestigationalUseDialog,
 } from '@ohif/ui-next';
+import ShareDialog from './ShareDialog';
 
 import { Types } from '@ohif/ui';
 
@@ -349,6 +350,26 @@ function WorkList({
             </>
           ),
           title: (instances || 0).toString(),
+          gridCol: 2,
+        },
+        {
+          key: 'share',
+          content: (
+            <Button
+              onClick={() =>
+                show({
+                  content: ShareDialog,
+                  contentProps: {
+                    studyInstanceUid: studyInstanceUid,
+                    onComplete: hide,
+                  },
+                })
+              }
+            >
+              Share
+            </Button>
+          ),
+          title: 'Share',
           gridCol: 2,
         },
       ],
