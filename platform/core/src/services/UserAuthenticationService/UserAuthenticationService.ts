@@ -19,6 +19,7 @@ class UserAuthenticationService extends PubSubService {
     _handleUnauthenticated: () => console.warn('_handleUnauthenticated() NOT IMPLEMENTED'),
     _reset: () => console.warn('reset() NOT IMPLEMENTED'),
     _set: () => console.warn('set() NOT IMPLEMENTED'),
+    _loginWithToken: () => console.warn('loginWithToken() NOT IMPLEMENTED'),
   };
 
   constructor() {
@@ -26,6 +27,10 @@ class UserAuthenticationService extends PubSubService {
     this.serviceImplementation = {
       ...this.serviceImplementation,
     };
+  }
+
+  public loginWithToken(token) {
+    return this.serviceImplementation._loginWithToken(token);
   }
 
   public getState() {
@@ -64,6 +69,7 @@ class UserAuthenticationService extends PubSubService {
     handleUnauthenticated: handleUnauthenticatedImplementation,
     reset: resetImplementation,
     set: setImplementation,
+    loginWithToken: loginWithTokenImplementation,
   }) {
     if (getStateImplementation) {
       this.serviceImplementation._getState = getStateImplementation;
@@ -85,6 +91,9 @@ class UserAuthenticationService extends PubSubService {
     }
     if (setImplementation) {
       this.serviceImplementation._set = setImplementation;
+    }
+    if (loginWithTokenImplementation) {
+      this.serviceImplementation._loginWithToken = loginWithTokenImplementation;
     }
   }
 }

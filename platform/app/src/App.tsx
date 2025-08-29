@@ -73,6 +73,22 @@ function App({
     run();
   }, []);
 
+  useEffect(() => {
+    if (!init) {
+      return;
+    }
+    const { userAuthenticationService } = init.servicesManager.services;
+    const query = new URLSearchParams(window.location.search);
+    const accessToken = query.get('accessToken');
+
+    if (accessToken) {
+      userAuthenticationService.loginWithToken(accessToken);
+      // Remove the access token from the URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }, [init]);
+
   if (!init) {
     return null;
   }

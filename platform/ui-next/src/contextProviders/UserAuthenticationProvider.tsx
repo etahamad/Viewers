@@ -84,9 +84,10 @@ export function UserAuthenticationProvider({ children, service }) {
         getUser,
         reset,
         set,
+        loginWithToken,
       });
     }
-  }, [getState, service, setUser, getUser, reset, set]);
+  }, [getState, service, setUser, getUser, reset, set, loginWithToken]);
 
   // TODO: This may not be correct, but I think we need to set the implementation for the service
   // immediately when this runs, since otherwise the authentication redirects will fail.
@@ -98,17 +99,35 @@ export function UserAuthenticationProvider({ children, service }) {
       getUser,
       reset,
       set,
+      loginWithToken,
     });
   }
+
+  const loginWithToken = token => {
+    const user = {
+      access_token: token,
+      // You might want to decode the token to get more user info
+    };
+    setUser(user);
+  };
+
+  const getAuthorizationHeader = () => {
+    const user = getUser();
+    if (user && user.access_token) {
+      return { Authorization: `Bearer ${user.access_token}` };
+    }
+    return service.getAuthorizationHeader();
+  };
 
   const api = {
     getState,
     setUser,
     getUser,
-    getAuthorizationHeader: service.getAuthorizationHeader,
+    getAuthorizationHeader,
     handleUnauthenticated: service.handleUnauthenticated,
     reset,
     set,
+    loginWithToken,
   };
 
   return (

@@ -9,10 +9,12 @@ import HeaderPatientInfo from './HeaderPatientInfo';
 import { PatientInfoVisibility } from './HeaderPatientInfo/HeaderPatientInfo';
 import { preserveQueryParameters } from '@ohif/app';
 import { Types } from '@ohif/core';
+import ShareDialog from './ShareDialog';
 
 function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }>) {
   const { servicesManager, extensionManager, commandsManager } = useSystem();
   const { customizationService } = servicesManager.services;
+  const [shareableLink, setShareableLink] = React.useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,7 +39,34 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
   };
 
   const { t } = useTranslation();
-  const { show } = useModal();
+  const { show, hide } = useModal();
+
+  const handleGenerateLink = async expiresIn => {
+    const { pathname } = location;
+    const studyInstanceUID = pathname.split('/')[2];
+
+    try {
+      const response = await fetch('/api/share', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studyInstanceUID,
+          expiresIn,
+        }),
+      });
+
+      if (response.ok) {
+        const { shareableLink } = await response.json();
+        setShareableLink(shareableLink);
+      } else {
+        console.error('Failed to generate shareable link');
+      }
+    } catch (error) {
+      console.error('Error generating shareable link:', error);
+    }
+  };
 
   const AboutModal = customizationService.getCustomization(
     'ohif.aboutModal'
@@ -87,7 +116,28 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
       isReturnEnabled={!!appConfig.showStudyList}
       onClickReturnButton={onClickReturnButton}
       WhiteLabeling={appConfig.whiteLabeling}
-      Secondary={<Toolbar buttonSection="secondary" />}
+      Secondary={
+        <div className="flex items-center">
+          <Toolbar buttonSection="secondary" />
+          <Button
+            variant="ghost"
+            className="hover:bg-primary-dark"
+            onClick={() =>
+              show({
+                content: ShareDialog,
+                contentProps: {
+                  onGenerateLink: handleGenerateLink,
+                  shareableLink,
+                  hide,
+                },
+                title: 'Share Study',
+              })
+            }
+          >
+            <Icons.Share />
+          </Button>
+        </div>
+      }
       PatientInfo={
         appConfig.showPatientInfo !== PatientInfoVisibility.DISABLED && (
           <HeaderPatientInfo
