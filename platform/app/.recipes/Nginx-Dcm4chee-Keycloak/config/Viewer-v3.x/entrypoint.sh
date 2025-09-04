@@ -8,7 +8,7 @@ if [ -n "$SSL_PORT" ]
 fi
 
 if [ -n "$APP_CONFIG" ]; then
-  echo "$APP_CONFIG" > /usr/share/nginx/html${PUBLIC_URL}app-config.js
+  cat "$APP_CONFIG" > /usr/share/nginx/html${PUBLIC_URL}app-config.js
   echo "Using custom APP_CONFIG environment variable"
 else
   echo "Not using custom APP_CONFIG"
