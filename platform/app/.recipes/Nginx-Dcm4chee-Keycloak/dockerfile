@@ -46,6 +46,9 @@ RUN chmod 777 /usr/src/entrypoint.sh
 COPY --from=builder /usr/src/app/platform/app/dist /usr/share/nginx/html${PUBLIC_URL}
 
 RUN chown -R nginx:nginx /usr/share/nginx/html && chmod -R 755 /usr/share/nginx/html
+
+RUN find /usr/share/nginx/html -exec chmod 755 {} \; && find /usr/share/nginx/html -exec chown nginx:nginx {} \;
+
 USER nginx
 ENTRYPOINT ["/usr/src/entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
