@@ -166,9 +166,10 @@ function App({
   return (
     <CombinedProviders>
       <BrowserRouter basename={routerBasename}>
-        <TokenHandler />
-        {authRoutes}
-        {appRoutes}
+        <TokenHandler>
+          {authRoutes}
+          {appRoutes}
+        </TokenHandler>
       </BrowserRouter>
     </CombinedProviders>
   );
