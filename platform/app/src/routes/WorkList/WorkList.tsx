@@ -356,7 +356,7 @@ function WorkList({
           key: 'share',
           content: (
             <Clipboard
-              text={`${window.location.origin}/viewer?StudyInstanceUIDs=${studyInstanceUid}&access_token=${userAuthenticationService.getAccessToken()}`}
+              text={`${window.location.origin}/viewer?StudyInstanceUIDs=${studyInstanceUid}&access_token=${userAuthenticationService.getUser()?.access_token}`}
               onCopy={() => {
                 uiNotificationService.show({
                   title: t('Common:CopiedToClipboard'),
