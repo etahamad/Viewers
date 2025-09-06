@@ -60,6 +60,7 @@ function WorkList({
   onRefresh,
   servicesManager,
 }: withAppTypes) {
+  const { userAuthenticationService, uiNotificationService } = servicesManager.services;
   const { show, hide } = useModal();
   const { t } = useTranslation();
   // ~ Modes
