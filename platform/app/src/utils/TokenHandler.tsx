@@ -1,11 +1,12 @@
-import { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { User } from 'oidc-client-ts';
 import { initUserManager } from './OpenIdConnectRoutes';
 import { useAppConfig } from '@state';
 
-function TokenHandler() {
+function TokenHandler({ children }) {
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { oidc, routerBasename, userAuthenticationService } = useAppConfig();
@@ -29,6 +30,7 @@ function TokenHandler() {
       if (user.expired) {
         console.log('Access token is expired. Redirecting to login.');
         userManager.signinRedirect();
+        // Don't render children, stay on a blank page until redirect happens.
         return;
       }
 
@@ -46,13 +48,19 @@ function TokenHandler() {
           },
           { replace: true }
         );
+        setIsAuthenticating(false);
       });
     } else {
       console.log('No access token found in URL.');
+      setIsAuthenticating(false);
     }
   }, [accessToken, userManager, userAuthenticationService, navigate, pathname, search]);
 
-  return null;
+  if (isAuthenticating) {
+    return null; // or a loading spinner
+  }
+
+  return <>{children}</>;
 }
 
 export default TokenHandler;
