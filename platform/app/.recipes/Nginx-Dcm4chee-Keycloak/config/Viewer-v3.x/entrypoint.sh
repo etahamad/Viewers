@@ -8,8 +8,16 @@ if [ -n "$SSL_PORT" ]
 fi
 
 if [ -n "$APP_CONFIG" ]; then
-  cat "$APP_CONFIG" > /usr/share/nginx/html${PUBLIC_URL}app-config.js
-  echo "Using custom APP_CONFIG environment variable"
+  TARGET_PATH="/usr/share/nginx/html${PUBLIC_URL}app-config.js"
+  # If APP_CONFIG is the same as the target, move it to a temp file first
+  if [ "$APP_CONFIG" = "$TARGET_PATH" ]; then
+    mv "$APP_CONFIG" "${APP_CONFIG}.bak"
+    cat "${APP_CONFIG}.bak" > "$TARGET_PATH"
+    echo "Moved original app-config.js to backup and copied to target."
+  else
+    cat "$APP_CONFIG" > "$TARGET_PATH"
+    echo "Using custom APP_CONFIG environment variable"
+  fi
 else
   echo "Not using custom APP_CONFIG"
 fi
