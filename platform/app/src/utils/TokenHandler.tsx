@@ -17,6 +17,7 @@ function TokenHandler() {
 
   useEffect(() => {
     if (accessToken && userManager) {
+      console.log('Access token found in URL.');
       const decodedToken = jwtDecode(accessToken);
       const user = new User({
         access_token: accessToken,
@@ -26,10 +27,12 @@ function TokenHandler() {
       });
 
       if (user.expired) {
+        console.log('Access token is expired. Redirecting to login.');
         userManager.signinRedirect();
         return;
       }
 
+      console.log('Access token is valid. Logging in user.');
       userManager.storeUser(user).then(() => {
         userAuthenticationService.setUser(user);
 
@@ -44,6 +47,8 @@ function TokenHandler() {
           { replace: true }
         );
       });
+    } else {
+      console.log('No access token found in URL.');
     }
   }, [accessToken, userManager, userAuthenticationService, navigate, pathname, search]);
 

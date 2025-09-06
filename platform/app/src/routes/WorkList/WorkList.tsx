@@ -351,6 +351,23 @@ function WorkList({
           title: (instances || 0).toString(),
           gridCol: 2,
         },
+        {
+          key: 'share',
+          content: (
+            <Clipboard
+              text={`${window.location.origin}/viewer?StudyInstanceUIDs=${studyInstanceUid}&access_token=${userAuthenticationService.getAccessToken()}`}
+              onCopy={() => {
+                uiNotificationService.show({
+                  title: t('Common:CopiedToClipboard'),
+                  type: 'success',
+                });
+              }}
+            >
+              <Icons.Share className="h-5 w-5" />
+            </Clipboard>
+          ),
+          gridCol: 1,
+        },
       ],
       // Todo: This is actually running for all rows, even if they are
       // not clicked on.
