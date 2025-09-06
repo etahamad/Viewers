@@ -25,7 +25,7 @@ function _makeAbsoluteIfNecessary(url, base_url) {
   return base_url + url;
 }
 
-const initUserManager = (oidc, routerBasename) => {
+export const initUserManager = (oidc, routerBasename) => {
   if (!oidc || !oidc.length) {
     return;
   }

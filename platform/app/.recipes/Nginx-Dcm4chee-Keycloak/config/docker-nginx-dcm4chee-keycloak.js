@@ -1,4 +1,7 @@
 /** @type {AppTypes.Config} */
+// To use token-based login, you can append `?access_token=<your_token>` to any URL.
+// The application will automatically log you in and remove the token from the URL.
+// Example: https://viewerdicom.cloudcompuexpediente.com/viewer?StudyInstanceUIDs=...&access_token=<your_token>
 window.config = {
   routerBasename: "/",
   showStudyList: true,
