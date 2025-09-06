@@ -24,9 +24,6 @@ import {
   // utils,
 } from '@ohif/core';
 
-import { User } from 'oidc-client-ts';
-import { jwtDecode } from 'jwt-decode';
-import { initUserManager } from './utils/OpenIdConnectRoutes';
 import loadModules, { loadModule as peerImport } from './pluginImports';
 
 /**
@@ -49,38 +46,6 @@ async function appInit(appConfigOrFunc, defaultExtensions, defaultModes) {
       : appConfigOrFunc),
   };
 
-  const query = new URLSearchParams(window.location.search);
-  const accessToken = query.get('access_token');
-
-  if (accessToken && appConfig.oidc) {
-    console.log('Access token found in URL, trying to log in.');
-
-    const userManager = initUserManager(appConfig.oidc, appConfig.routerBasename);
-
-    if (userManager) {
-      const decodedToken = jwtDecode(accessToken);
-      const user = new User({
-        access_token: accessToken,
-        profile: decodedToken,
-        token_type: 'Bearer',
-        expires_at: decodedToken.exp,
-      });
-
-      if (user.expired) {
-        console.log('Access token is expired. Redirecting to login.');
-        userManager.signinRedirect();
-        return new Promise(() => {});
-      }
-
-      console.log('Access token is valid. Storing user.');
-      await userManager.storeUser(user);
-
-      const newQuery = new URLSearchParams(window.location.search);
-      newQuery.delete('access_token');
-      const newUrl = `${window.location.pathname}?${newQuery.toString()}`;
-      window.history.replaceState({}, '', newUrl);
-    }
-  }
   // Default the peer import function
   appConfig.peerImport ||= peerImport;
   appConfig.measurementTrackingMode ||= 'standard';
