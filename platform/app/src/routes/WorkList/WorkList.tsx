@@ -352,23 +352,6 @@ function WorkList({
           title: (instances || 0).toString(),
           gridCol: 2,
         },
-        {
-          key: 'share',
-          content: (
-            <Clipboard
-              text={`${window.location.origin}/viewer?StudyInstanceUIDs=${studyInstanceUid}&access_token=${userAuthenticationService.getUser()?.access_token}`}
-              onCopy={() => {
-                uiNotificationService.show({
-                  title: t('Common:CopiedToClipboard'),
-                  type: 'success',
-                });
-              }}
-            >
-              <Icons.Share className="h-5 w-5" />
-            </Clipboard>
-          ),
-          gridCol: 1,
-        },
       ],
       // Todo: This is actually running for all rows, even if they are
       // not clicked on.
@@ -394,6 +377,27 @@ function WorkList({
           }
         >
           <div className="flex flex-row gap-2">
+            <Button
+              onClick={() => {
+                console.log('Share button clicked');
+                const user = userAuthenticationService.getUser();
+                if (!user) {
+                  console.log('No user found, cannot share.');
+                  return;
+                }
+                const accessToken = user.access_token;
+                const shareableLink = `${window.location.origin}/viewer?StudyInstanceUIDs=${studyInstanceUid}&access_token=${accessToken}`;
+                console.log('Shareable link:', shareableLink);
+                navigator.clipboard.writeText(shareableLink).then(() => {
+                  uiNotificationService.show({
+                    title: t('Common:CopiedToClipboard'),
+                    type: 'success',
+                  });
+                });
+              }}
+            >
+              {t('Common:Share')}
+            </Button>
             {(appConfig.groupEnabledModesFirst
               ? appConfig.loadedModes.sort((a, b) => {
                   const isValidA = a.isValidMode({
