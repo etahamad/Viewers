@@ -111,6 +111,14 @@ function OpenIdConnectRoutes({ oidc, routerBasename, userAuthenticationService }
   };
 
   const handleUnauthenticated = () => {
+    const query = new URLSearchParams(window.location.search);
+    const accessToken = query.get('access_token');
+
+    if (accessToken) {
+      // If we have an access token, we assume appInit.js is handling it.
+      // We don't redirect, and we return null to render nothing while we wait.
+      return null;
+    }
     // Note: Don't await the redirect. If you make this component async it
     // causes a react error before redirect as it returns a promise of a component rather than a component.
     userManager.signinRedirect();
