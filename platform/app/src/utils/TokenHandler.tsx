@@ -25,6 +25,11 @@ function TokenHandler() {
         expires_at: decodedToken.exp,
       });
 
+      if (user.expired) {
+        userManager.signinRedirect();
+        return;
+      }
+
       userManager.storeUser(user).then(() => {
         userAuthenticationService.setUser(user);
 
