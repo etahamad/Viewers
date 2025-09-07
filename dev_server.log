@@ -1,2 +1,1 @@
-yarn run v1.22.22
-$ lerna run dev:viewer --stream
+yarn exec v1.22.22
