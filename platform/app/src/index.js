@@ -25,6 +25,24 @@ export { history } from './utils/history';
 export { preserveQueryParameters, preserveQueryStrings } from './utils/preserveQueryParameters';
 
 const handleTokenLogin = async config => {
+  if (config.oidc && config.oidc.length > 0) {
+    const oidcConfig = config.oidc[0];
+    const redirectUri = oidcConfig.redirect_uri || '/callback';
+    const routerBasename = config.routerBasename || '';
+
+    // Get the path from the redirect URI, handling both absolute and relative URLs.
+    // Making sure to remove the basename from the path.
+    const callbackPath = new URL(redirectUri, window.location.origin).pathname.replace(
+      routerBasename,
+      ''
+    );
+    const currentPath = window.location.pathname.replace(routerBasename, '');
+
+    if (callbackPath === currentPath) {
+      return;
+    }
+  }
+
   const queryParams = new URLSearchParams(window.location.search);
   const hashParams = new URLSearchParams(window.location.hash.substring(1));
 
