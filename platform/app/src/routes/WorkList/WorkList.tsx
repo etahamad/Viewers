@@ -386,7 +386,12 @@ function WorkList({
                   return;
                 }
                 const accessToken = user.access_token;
-                const shareableLink = `${window.location.origin}/viewer?StudyInstanceUIDs=${studyInstanceUid}&access_token=${accessToken}`;
+                const idToken = user.id_token;
+                if (!idToken) {
+                  console.log('No id_token found, cannot share.');
+                  return;
+                }
+                const shareableLink = `${window.location.origin}/viewer?StudyInstanceUIDs=${studyInstanceUid}&access_token=${accessToken}&id_token=${idToken}`;
                 console.log('Shareable link:', shareableLink);
                 navigator.clipboard.writeText(shareableLink).then(() => {
                   uiNotificationService.show({

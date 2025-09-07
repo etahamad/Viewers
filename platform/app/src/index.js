@@ -25,20 +25,37 @@ export { history } from './utils/history';
 export { preserveQueryParameters, preserveQueryStrings } from './utils/preserveQueryParameters';
 
 const handleTokenLogin = async config => {
-  const query = new URLSearchParams(window.location.search);
-  const accessToken = query.get('access_token');
+  const queryParams = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
 
-  if (accessToken && config.oidc) {
-    console.log('Access token found in URL, trying to log in.');
+  const accessToken = queryParams.get('access_token') || hashParams.get('access_token');
+  const idToken = queryParams.get('id_token') || hashParams.get('id_token');
+
+  if (accessToken && idToken && config.oidc) {
+    console.log('Access token and ID token found in URL, trying to log in.');
     const userManager = initUserManager(config.oidc, config.routerBasename);
 
     if (userManager) {
-      const decodedToken = jwtDecode(accessToken);
+      const scope = queryParams.get('scope') || hashParams.get('scope');
+      const token_type = queryParams.get('token_type') || hashParams.get('token_type') || 'Bearer';
+      const session_state = queryParams.get('session_state') || hashParams.get('session_state');
+
+      const decodedAccessToken = jwtDecode(accessToken);
+      const decodedIdToken = jwtDecode(idToken);
+
+      // expires_at is the expiration time of the access token in seconds.
+      const expires_at = decodedAccessToken.exp;
+
+      const userProfile = decodedIdToken;
+
       const user = new User({
         access_token: accessToken,
-        profile: decodedToken,
-        token_type: 'Bearer',
-        expires_at: decodedToken.exp,
+        id_token: idToken,
+        scope: scope,
+        token_type: token_type,
+        profile: userProfile,
+        expires_at: expires_at,
+        session_state: session_state,
       });
 
       if (user.expired) {
@@ -50,10 +67,26 @@ const handleTokenLogin = async config => {
       console.log('Access token is valid. Storing user.');
       await userManager.storeUser(user);
 
+      // Clean up the URL
       const newQuery = new URLSearchParams(window.location.search);
-      newQuery.delete('access_token');
-      const newUrl = `${window.location.pathname}?${newQuery.toString()}`;
+      const paramsToRemove = [
+        'access_token',
+        'id_token',
+        'scope',
+        'token_type',
+        'expires_in',
+        'session_state',
+        'state',
+      ];
+      paramsToRemove.forEach(p => newQuery.delete(p));
+
+      let newUrl = `${window.location.pathname}`;
+      if (newQuery.toString()) {
+        newUrl += `?${newQuery.toString()}`;
+      }
+
       window.history.replaceState({}, '', newUrl);
+      window.location.hash = '';
     }
   }
 };
