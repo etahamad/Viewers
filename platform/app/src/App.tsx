@@ -35,6 +35,7 @@ import createRoutes from './routes';
 import appInit from './appInit.js';
 import OpenIdConnectRoutes from './utils/OpenIdConnectRoutes';
 import TokenHandler from './utils/TokenHandler';
+import { initializeTokenManagement } from './utils/urlTokenManager';
 import { ShepherdJourneyProvider } from 'react-shepherd';
 import './App.css';
 
@@ -68,6 +69,9 @@ function App({
   const [init, setInit] = useState(null);
   useEffect(() => {
     const run = async () => {
+      // Initialize token management system
+      initializeTokenManagement();
+      
       appInit(config, defaultExtensions, defaultModes).then(setInit).catch(console.error);
     };
 

@@ -636,6 +636,17 @@ const toolbarButtons: Button[] = [
     },
   },
   {
+    id: 'ShareStudy',
+    uiType: 'ohif.shareButton',
+    props: {
+      icon: 'tool-share',
+      label: 'Share Study',
+      tooltip: 'Generate secure link to share this study',
+      commands: 'shareStudy',
+      evaluate: 'evaluate.action',
+    },
+  },
+  {
     id: 'Crosshairs',
     uiType: 'ohif.toolButton',
     props: {

@@ -9,7 +9,7 @@ import ViewportGrid from '@components/ViewportGrid';
 import Compose from './Compose';
 import loadModules from '../../pluginImports';
 import { defaultRouteInit } from './defaultRouteInit';
-import { updateAuthServiceAndCleanUrl } from './updateAuthServiceAndCleanUrl';
+import { updateAuthServiceAndCleanUrl, hasValidTokenContext } from './updateAuthServiceAndCleanUrl';
 
 const { getSplitParam } = utils;
 
@@ -69,9 +69,26 @@ export default function ModeRoute({
   const runTimeHangingProtocolId = lowerCaseSearchParams.get('hangingprotocolid');
   const runTimeStageId = lowerCaseSearchParams.get('stageid');
   const token = lowerCaseSearchParams.get('token');
-
-  if (token) {
-    updateAuthServiceAndCleanUrl(token, location, userAuthenticationService);
+  
+  // Enhanced token handling with validation
+  const isTokenUser = hasValidTokenContext(lowerCaseSearchParams);
+  
+  if (token && isTokenUser) {
+    try {
+      updateAuthServiceAndCleanUrl(token, location, userAuthenticationService, lowerCaseSearchParams);
+      console.log('Token-based authentication initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize token-based authentication:', error);
+      // Continue with normal flow if token setup fails
+    }
+  } else if (token) {
+    console.warn('Invalid token provided, falling back to normal authentication');
+    // Clean invalid token from URL
+    const urlObj = new URL(window.location.origin + window.location.pathname + location.search);
+    urlObj.searchParams.delete('token');
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', urlObj.toString());
+    }
   }
 
   // An undefined dataSourceName implies that the active data source that is already set in the ExtensionManager should be used.

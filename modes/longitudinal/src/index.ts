@@ -99,6 +99,7 @@ function modeFactory({ modeConfiguration }) {
         'WindowLevel',
         'Capture',
         'Layout',
+        'ShareStudy',
         'Crosshairs',
         'MoreTools',
       ]);

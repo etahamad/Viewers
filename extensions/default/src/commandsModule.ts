@@ -24,6 +24,8 @@ import { useViewportsByPositionStore } from './stores/useViewportsByPositionStor
 import { useToggleOneUpViewportGridStore } from './stores/useToggleOneUpViewportGridStore';
 import requestDisplaySetCreationForStudy from './Panels/requestDisplaySetCreationForStudy';
 import promptSaveReport from './utils/promptSaveReport';
+import { getActiveStudyUIDs, validateSharingContext } from './utils/shareUtils';
+import ShareModal from './Components/ShareModal';
 
 export type HangingProtocolParams = {
   protocolId?: string;
@@ -756,6 +758,54 @@ const commandsModule = ({
 
       setTimeout(() => actions.scrollActiveThumbnailIntoView(), 0);
     },
+
+    /**
+     * Opens the study sharing modal
+     * Validates the sharing context and displays the ShareModal component
+     */
+    shareStudy: () => {
+      const { uiModalService } = servicesManager.services;
+      
+      // Validate sharing context
+      const validation = validateSharingContext(servicesManager);
+      
+      if (!validation.isAvailable) {
+        uiNotificationService.show({
+          title: 'Sharing Unavailable',
+          message: validation.errorMessage || 'Cannot share studies at this time',
+          type: 'error',
+          duration: 5000,
+        });
+        return;
+      }
+      
+      // Get active study UIDs
+      const studyUIDs = getActiveStudyUIDs(servicesManager);
+      
+      if (studyUIDs.length === 0) {
+        uiNotificationService.show({
+          title: 'No Studies to Share',
+          message: 'No active studies found to share',
+          type: 'warning',
+          duration: 5000,
+        });
+        return;
+      }
+      
+      // Show the sharing modal
+      uiModalService.show({
+        content: ShareModal,
+        title: 'Share Study',
+        contentProps: {
+          studyInstanceUIDs: studyUIDs,
+          onClose: () => uiModalService.hide(),
+          servicesManager,
+        },
+        shouldCloseOnEsc: true,
+        shouldCloseOnOverlayClick: true,
+        containerClassName: 'max-w-2xl',
+      });
+    },
   };
 
   const definitions = {
@@ -784,6 +834,7 @@ const commandsModule = ({
     scrollActiveThumbnailIntoView: actions.scrollActiveThumbnailIntoView,
     addDisplaySetAsLayer: actions.addDisplaySetAsLayer,
     removeDisplaySetLayer: actions.removeDisplaySetLayer,
+    shareStudy: actions.shareStudy,
   };
 
   return {

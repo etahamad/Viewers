@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Token validation service
+  token-validator:
+    build: ./token-validator
+    restart: unless-stopped
+    networks:
+      - traefik_network
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - DCM4CHEE_URL=http://dcm4chee:8080
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.token-validator.loadbalancer.server.port=3001
+
+  # Enhanced OHIF Viewer
+  ohif-viewer:
+    # ... existing config ...
+    labels:
+      - traefik.enable=true
+      
+      # Standard route
+      - traefik.http.routers.ohif_app.rule=Host(`viewerdicom.cloudcompuexpediente.com`)
+      - traefik.http.routers.ohif_app.entrypoints=websecure
+      - traefik.http.routers.ohif_app.tls.certresolver=letsencryptresolver
+      - traefik.http.routers.ohif_app.service=ohif_app
+      - traefik.http.routers.ohif_app.priority=10
+      
+      # Token route (higher priority)
+      - traefik.http.routers.ohif_token.rule=Host(`viewerdicom.cloudcompuexpediente.com`) && Query(`token`)
+      - traefik.http.routers.ohif_token.entrypoints=websecure
+      - traefik.http.routers.ohif_token.tls.certresolver=letsencryptresolver
+      - traefik.http.routers.ohif_token.service=ohif_app
+      - traefik.http.routers.ohif_token.priority=100
+      - traefik.http.routers.ohif_token.middlewares=token-auth@docker
+      
+      # Token auth middleware
+      - traefik.http.middlewares.token-auth.forwardauth.address=http://token-validator:3001/validate
+      - traefik.http.middlewares.token-auth.forwardauth.authResponseHeaders=X-User-ID,X-Study-Access,X-Permissions
+      
+      - traefik.http.services.ohif_app.loadbalancer.server.port=80
+
+networks:
+  traefik_network:
+    external: true
