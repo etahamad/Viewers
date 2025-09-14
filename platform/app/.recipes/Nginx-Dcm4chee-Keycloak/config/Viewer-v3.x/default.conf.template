@@ -1,5 +1,5 @@
 server {
-    gzip_static on;
+    gzip_static always;
     gzip_proxied expired no-cache no-store private auth;
     gunzip on;
     listen ${PORT} default_server;
@@ -26,13 +26,6 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
-    }
-
-    # Handle preflight requests
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-        try_files $uri =404;
     }
 
     error_page 500 502 503 504 /50x.html;
