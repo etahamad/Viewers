@@ -75,6 +75,7 @@ export default function ModeRoute({
     const keycloakConfig = appConfig.oidc?.[0] ? {
       authority: appConfig.oidc[0].authority,
       clientId: appConfig.oidc[0].client_id,
+      clientSecret: appConfig.oidc[0].client_secret,
       realm: appConfig.oidc[0].realm,
     } : undefined;
 

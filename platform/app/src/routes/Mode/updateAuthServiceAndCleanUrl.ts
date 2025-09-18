@@ -1,6 +1,7 @@
 interface KeycloakConfig {
   authority: string;
   clientId: string;
+  clientSecret?: string;
   realm?: string;
 }
 
@@ -16,13 +17,17 @@ async function validateKeycloakToken(
 ): Promise<boolean> {
   try {
     const introspectUrl = `${config.authority}/protocol/openid-connect/token/introspect`;
-    
+
+    const requestBody = config.clientSecret
+      ? `token=${encodeURIComponent(token)}&client_id=${encodeURIComponent(config.clientId)}&client_secret=${encodeURIComponent(config.clientSecret)}`
+      : `token=${encodeURIComponent(token)}&client_id=${encodeURIComponent(config.clientId)}`;
+
     const response = await fetch(introspectUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: `token=${encodeURIComponent(token)}&client_id=${encodeURIComponent(config.clientId)}`,
+      body: requestBody,
     });
 
     if (!response.ok) {
