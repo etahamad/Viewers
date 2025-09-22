@@ -35,6 +35,7 @@ import createRoutes from './routes';
 import appInit from './appInit.js';
 import OpenIdConnectRoutes from './utils/OpenIdConnectRoutes';
 import TokenHandler from './utils/TokenHandler';
+import EarlyTokenHandler from './utils/EarlyTokenHandler';
 import { ShepherdJourneyProvider } from 'react-shepherd';
 import './App.css';
 
@@ -166,6 +167,7 @@ function App({
   return (
     <CombinedProviders>
       <BrowserRouter basename={routerBasename}>
+        <EarlyTokenHandler />
         <TokenHandler />
         {authRoutes}
         {appRoutes}

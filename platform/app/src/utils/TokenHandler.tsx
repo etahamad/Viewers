@@ -13,37 +13,47 @@ function TokenHandler() {
 
   const { search, pathname } = location;
   const query = new URLSearchParams(search);
-  const accessToken = query.get('access_token');
+  const accessToken = query.get('access_token') || query.get('token');
 
   useEffect(() => {
     if (accessToken && userManager) {
-      const decodedToken = jwtDecode(accessToken);
-      const user = new User({
-        access_token: accessToken,
-        profile: decodedToken,
-        token_type: 'Bearer',
-        expires_at: decodedToken.exp,
-      });
+      try {
+        const decodedToken = jwtDecode(accessToken);
+        const user = new User({
+          access_token: accessToken,
+          profile: decodedToken as any,
+          token_type: 'Bearer',
+          expires_at: decodedToken.exp,
+        });
 
-      if (user.expired) {
-        userManager.signinRedirect();
-        return;
+        if (user.expired) {
+          userManager.signinRedirect();
+          return;
+        }
+
+        userManager.storeUser(user).then(() => {
+          // Create a user object that matches the expected interface
+          const userForAuth = {
+            ...user,
+            id_token: accessToken, // Use the access token as id_token for compatibility
+          };
+          userAuthenticationService.setUser(userForAuth as any);
+
+          const newQuery = new URLSearchParams(search);
+          newQuery.delete('access_token');
+          newQuery.delete('token');
+
+          navigate(
+            {
+              pathname,
+              search: newQuery.toString(),
+            },
+            { replace: true }
+          );
+        });
+      } catch (error) {
+        console.error('Error processing token:', error);
       }
-
-      userManager.storeUser(user).then(() => {
-        userAuthenticationService.setUser(user);
-
-        const newQuery = new URLSearchParams(search);
-        newQuery.delete('access_token');
-
-        navigate(
-          {
-            pathname,
-            search: newQuery.toString(),
-          },
-          { replace: true }
-        );
-      });
     }
   }, [accessToken, userManager, userAuthenticationService, navigate, pathname, search]);
 
