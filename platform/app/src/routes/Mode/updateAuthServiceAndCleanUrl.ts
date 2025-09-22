@@ -1,3 +1,6 @@
+import { jwtDecode } from 'jwt-decode';
+import { User } from 'oidc-client-ts';
+
 interface KeycloakConfig {
   authority: string;
   clientId: string;
@@ -11,10 +14,7 @@ interface KeycloakConfig {
  * @param config - Keycloak configuration
  * @returns Promise<boolean> - True if token is valid and active
  */
-async function validateKeycloakToken(
-  token: string,
-  config: KeycloakConfig
-): Promise<boolean> {
+async function validateKeycloakToken(token: string, config: KeycloakConfig): Promise<boolean> {
   try {
     const introspectUrl = `${config.authority}/protocol/openid-connect/token/introspect`;
 
@@ -74,13 +74,39 @@ export async function updateAuthServiceAndCleanUrl(
     }
   }
 
-  // if a token is passed in, set the userAuthenticationService to use it
-  // for the Authorization header for all requests
-  userAuthenticationService.setServiceImplementation({
-    getAuthorizationHeader: () => ({
-      Authorization: 'Bearer ' + token,
-    }),
-  });
+  try {
+    // Decode the JWT token to get user information
+    const decodedToken = jwtDecode(token);
+
+    // Create a proper OIDC User object
+    const user = new User({
+      access_token: token,
+      profile: decodedToken,
+      token_type: 'Bearer',
+      expires_at: decodedToken.exp,
+    });
+
+    // Check if token is expired
+    if (user.expired) {
+      console.error('Token has expired');
+      return;
+    }
+
+    // Set the user in the authentication service
+    userAuthenticationService.setUser(user);
+
+    // Set the service implementation for authorization headers
+    userAuthenticationService.setServiceImplementation({
+      getAuthorizationHeader: () => ({
+        Authorization: 'Bearer ' + token,
+      }),
+    });
+
+    console.log('Token authentication successful, user set in authentication service');
+  } catch (error) {
+    console.error('Error processing token:', error);
+    return;
+  }
 
   // Create a URL object with the current location
   const urlObj = new URL(window.location.origin + window.location.pathname + location.search);
