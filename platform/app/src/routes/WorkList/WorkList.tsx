@@ -39,6 +39,7 @@ import {
 import { Types } from '@ohif/ui';
 
 import { preserveQueryParameters, preserveQueryStrings } from '../../utils/preserveQueryParameters';
+import ShareButton from '../../components/ShareButton';
 
 const PatientInfoVisibility = Types.PatientInfoVisibility;
 
@@ -376,6 +377,9 @@ function WorkList({
           }
         >
           <div className="flex flex-row gap-2">
+            {/* Share Button */}
+            <ShareButton studyInstanceUid={studyInstanceUid} />
+
             {(appConfig.groupEnabledModesFirst
               ? appConfig.loadedModes.sort((a, b) => {
                   const isValidA = a.isValidMode({

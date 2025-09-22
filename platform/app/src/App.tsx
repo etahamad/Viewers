@@ -36,6 +36,7 @@ import appInit from './appInit.js';
 import OpenIdConnectRoutes from './utils/OpenIdConnectRoutes';
 import TokenHandler from './utils/TokenHandler';
 import EarlyTokenHandler from './utils/EarlyTokenHandler';
+import TokenService from './services/TokenService';
 import { ShepherdJourneyProvider } from 'react-shepherd';
 import './App.css';
 
@@ -90,6 +91,11 @@ function App({
   const appConfigState = init.appConfig;
   const { routerBasename, modes, dataSources, oidc, showStudyList } = appConfigState;
 
+  // Initialize TokenService with OIDC configuration
+  if (oidc && oidc.length > 0) {
+    TokenService.getInstance().initialize(oidc);
+  }
+
   // get the maximum 3D texture size
   const canvas = document.createElement('canvas');
   const gl = canvas.getContext('webgl2');
@@ -110,32 +116,36 @@ function App({
     customizationService,
   } = servicesManager.services;
 
-  const providers = [
+  const providers: Array<[React.ComponentType<any>, any]> = [
     [AppConfigProvider, { value: appConfigState }],
     [UserAuthenticationProvider, { service: userAuthenticationService }],
     [I18nextProvider, { i18n }],
-    [ThemeWrapperNext],
+    [ThemeWrapperNext, {}],
     [SystemContextProvider, { commandsManager, extensionManager, hotkeysManager, servicesManager }],
-    [ViewportRefsProvider],
+    [ViewportRefsProvider, {}],
     [ViewportGridProvider, { service: viewportGridService }],
     [ViewportDialogProvider, { service: uiViewportDialogService }],
     [CineProvider, { service: cineService }],
     [NotificationProvider, { service: uiNotificationService }],
-    [TooltipProvider],
+    [TooltipProvider, {}],
     [DialogProvider, { service: uiDialogService, dialog: ManagedDialog }],
     [ModalProvider, { service: uiModalService, modal: ModalNext }],
-    [ShepherdJourneyProvider],
+    [ShepherdJourneyProvider, {}],
   ];
 
   // Loop through and register each of the service providers registered with the ServiceProvidersManager.
   const providersFromManager = Object.entries(serviceProvidersManager.providers);
   if (providersFromManager.length > 0) {
     providersFromManager.forEach(([serviceName, provider]) => {
-      providers.push([provider, { service: servicesManager.services[serviceName] }]);
+      providers.push([
+        provider as React.ComponentType<any>,
+        { service: servicesManager.services[serviceName] },
+      ]);
     });
   }
 
-  const CombinedProviders = ({ children }) => Compose({ components: providers, children });
+  const CombinedProviders = ({ children }: { children: React.ReactNode }) =>
+    Compose({ components: providers, children });
 
   let authRoutes = null;
 
