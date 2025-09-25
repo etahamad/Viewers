@@ -177,6 +177,12 @@ services:
       - traefik_network
     ports:
       - "389:389"
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-H", "ldap://localhost:389", "-D", "cn=admin,dc=dcm4che,dc=org", "-w", "secret", "-b", "dc=dcm4che,dc=org", "-s", "base"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   keycloak:
     image: dcm4che/keycloak:26.0.6
@@ -210,7 +216,8 @@ services:
       - KC_SPI_CORS_ALLOW_CREDENTIALS=true
       - KC_SPI_CORS_MAX_AGE=1000
     depends_on:
-      - ldap
+      ldap:
+        condition: service_healthy
     networks:
       - traefik_network
     labels:
@@ -247,8 +254,10 @@ services:
       - "2575:2575"
       - "12575:12575"
     depends_on:
-      - ldap
-      - keycloak
+      ldap:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
     environment:
       - WILDFLY_ADMIN_USER=admin
       - WILDFLY_ADMIN_PASSWORD=your-admin-password
