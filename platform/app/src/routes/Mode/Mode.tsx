@@ -70,8 +70,19 @@ export default function ModeRoute({
   const runTimeStageId = lowerCaseSearchParams.get('stageid');
   const token = lowerCaseSearchParams.get('token');
 
-  if (token) {
-    updateAuthServiceAndCleanUrl(token, location, userAuthenticationService);
+  // Only process token if user is not already authenticated
+  if (token && !userAuthenticationService.getUser()) {
+    // Extract Keycloak configuration from appConfig if available
+    const keycloakConfig = appConfig.oidc?.[0]
+      ? {
+          authority: appConfig.oidc[0].authority,
+          clientId: appConfig.oidc[0].client_id,
+          clientSecret: appConfig.oidc[0].client_secret,
+          realm: appConfig.oidc[0].realm,
+        }
+      : undefined;
+
+    updateAuthServiceAndCleanUrl(token, location, userAuthenticationService, keycloakConfig);
   }
 
   // An undefined dataSourceName implies that the active data source that is already set in the ExtensionManager should be used.

@@ -1,6 +1,8 @@
 import React from 'react';
 import { useEffect, useMemo } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router';
+import { jwtDecode } from 'jwt-decode';
+import { User } from 'oidc-client-ts';
 import CallbackPage from '../routes/CallbackPage';
 import SignoutCallbackComponent from '../routes/SignoutCallbackComponent';
 import LegacyClient from './legacyOIDCClient';
@@ -25,7 +27,7 @@ function _makeAbsoluteIfNecessary(url, base_url) {
   return base_url + url;
 }
 
-const initUserManager = (oidc, routerBasename) => {
+export const initUserManager = (oidc, routerBasename) => {
   if (!oidc || !oidc.length) {
     return;
   }
@@ -60,7 +62,8 @@ function LogoutComponent(props) {
   return null;
 }
 
-function LoginComponent(userManager) {
+function LoginComponent(props) {
+  const { userManager, oidcAuthority } = props;
   const queryParams = new URLSearchParams(location.search);
   const iss = queryParams.get('iss');
   const loginHint = queryParams.get('login_hint');
@@ -111,8 +114,16 @@ function OpenIdConnectRoutes({ oidc, routerBasename, userAuthenticationService }
   };
 
   const handleUnauthenticated = () => {
+    // Check if user is already authenticated before redirecting
+    const user = userAuthenticationService.getUser();
+    if (user) {
+      console.log('User already authenticated, skipping redirect');
+      return null;
+    }
+
     // Note: Don't await the redirect. If you make this component async it
     // causes a react error before redirect as it returns a promise of a component rather than a component.
+    console.log('No user found, redirecting to Keycloak login');
     userManager.signinRedirect();
 
     // return null because this is used in a react component
@@ -139,6 +150,58 @@ function OpenIdConnectRoutes({ oidc, routerBasename, userAuthenticationService }
   }, []);
 
   useEffect(() => {
+    // Check for token in URL before setting up authentication
+    const { search } = location;
+    const query = new URLSearchParams(search);
+    const token = query.get('token') || query.get('access_token');
+
+    if (token) {
+      console.log('OpenIdConnectRoutes: Processing token from URL...');
+      try {
+        // Decode the JWT token to get user information
+        const decodedToken = jwtDecode(token);
+
+        // Create a proper OIDC User object
+        const user = new User({
+          access_token: token,
+          profile: decodedToken as any,
+          token_type: 'Bearer',
+          expires_at: decodedToken.exp,
+        });
+
+        // Check if token is expired
+        if (user.expired) {
+          console.error('Token has expired');
+        } else {
+          // Set the user in the authentication service immediately
+          const userForAuth = {
+            ...user,
+            id_token: token, // Use the access token as id_token for compatibility
+          };
+          userAuthenticationService.setUser(userForAuth as any);
+
+          console.log(
+            'OpenIdConnectRoutes: Token authentication successful, user set in authentication service'
+          );
+
+          // Clean the URL by removing the token parameter
+          const newQuery = new URLSearchParams(search);
+          newQuery.delete('token');
+          newQuery.delete('access_token');
+
+          const newSearch = newQuery.toString();
+          const newUrl = location.pathname + (newSearch ? '?' + newSearch : '');
+
+          // Update the browser's history without the token
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', newUrl);
+          }
+        }
+      } catch (error) {
+        console.error('OpenIdConnectRoutes: Error processing token:', error);
+      }
+    }
+
     userAuthenticationService.set({ enabled: true });
 
     userAuthenticationService.setServiceImplementation({
