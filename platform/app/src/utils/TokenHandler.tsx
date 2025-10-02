@@ -36,6 +36,8 @@ function TokenHandler() {
           const userForAuth = {
             ...user,
             id_token: accessToken, // Use the access token as id_token for compatibility
+            isTokenAuthenticated: true, // Flag to indicate token-based authentication
+            originalStudyUrl: pathname + search, // Store the original study URL for redirect
           };
           userAuthenticationService.setUser(userForAuth as any);
 

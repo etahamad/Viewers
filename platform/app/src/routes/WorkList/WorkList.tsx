@@ -82,6 +82,19 @@ function WorkList({
     ...sessionQueryFilterValues,
   });
 
+  // Check if user was authenticated via token and redirect to original study
+  const { userAuthenticationService } = servicesManager.services;
+  const user = userAuthenticationService.getUser();
+  const isTokenAuthenticated = user?.isTokenAuthenticated || false;
+  const originalStudyUrl = user?.originalStudyUrl;
+
+  useEffect(() => {
+    if (isTokenAuthenticated && originalStudyUrl) {
+      console.log('Token-authenticated user detected, redirecting to original study:', originalStudyUrl);
+      navigate(originalStudyUrl, { replace: true });
+    }
+  }, [isTokenAuthenticated, originalStudyUrl, navigate]);
+
   const debouncedFilterValues = useDebounce(filterValues, 200);
   const { resultsPerPage, pageNumber, sortBy, sortDirection } = filterValues;
 

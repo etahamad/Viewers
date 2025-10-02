@@ -176,6 +176,8 @@ function OpenIdConnectRoutes({ oidc, routerBasename, userAuthenticationService }
           const userForAuth = {
             ...user,
             id_token: token, // Use the access token as id_token for compatibility
+            isTokenAuthenticated: true, // Flag to indicate token-based authentication
+            originalStudyUrl: location.pathname + location.search, // Store the original study URL for redirect
           };
           userAuthenticationService.setUser(userForAuth as any);
 

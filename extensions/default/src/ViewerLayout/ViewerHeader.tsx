@@ -12,10 +12,14 @@ import { Types } from '@ohif/core';
 
 function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }>) {
   const { servicesManager, extensionManager, commandsManager } = useSystem();
-  const { customizationService } = servicesManager.services;
+  const { customizationService, userAuthenticationService } = servicesManager.services;
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Check if user was authenticated via token
+  const user = userAuthenticationService.getUser();
+  const isTokenAuthenticated = user?.isTokenAuthenticated || false;
 
   const onClickReturnButton = () => {
     const { pathname } = location;
@@ -84,7 +88,7 @@ function ViewerHeader({ appConfig }: withAppTypes<{ appConfig: AppTypes.Config }
   return (
     <Header
       menuOptions={menuOptions}
-      isReturnEnabled={!!appConfig.showStudyList}
+      isReturnEnabled={!!appConfig.showStudyList && !isTokenAuthenticated}
       onClickReturnButton={onClickReturnButton}
       WhiteLabeling={appConfig.whiteLabeling}
       Secondary={<Toolbar buttonSection="secondary" />}

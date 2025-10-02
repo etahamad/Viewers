@@ -93,7 +93,12 @@ export async function updateAuthServiceAndCleanUrl(
     }
 
     // Set the user in the authentication service
-    userAuthenticationService.setUser(user);
+    const userForAuth = {
+      ...user,
+      isTokenAuthenticated: true, // Flag to indicate token-based authentication
+      originalStudyUrl: location.pathname + location.search, // Store the original study URL for redirect
+    };
+    userAuthenticationService.setUser(userForAuth);
 
     // Set the service implementation for authorization headers
     userAuthenticationService.setServiceImplementation({
